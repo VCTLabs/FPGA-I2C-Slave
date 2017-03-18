@@ -35,8 +35,10 @@ architecture Testbench of I2C_slave_TB is
   signal ack                  : std_logic                    := '0';
   signal read_req             : std_logic                    := '0';
   signal data_to_master       : std_logic_vector(7 downto 0) := (others => '0');
+  signal read_done            : std_logic                    := '0';
   signal data_valid           : std_logic                    := '0';
   signal data_from_master     : std_logic_vector(7 downto 0) := (others => '0');
+  signal write_done           : std_logic                    := '0';
   signal data_from_master_reg : std_logic_vector(7 downto 0) := (others => '0');
 
   -- random spike generation
@@ -75,8 +77,10 @@ begin
       -- user interface
       read_req         => read_req,
       data_to_master   => data_to_master,
+      read_done        => read_done,
       data_valid       => data_valid,
-      data_from_master => data_from_master);
+      data_from_master => data_from_master,
+      write_done       => write_done);
 
   ---- DUT clock running forever ----------------------------
   process

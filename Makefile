@@ -1,4 +1,4 @@
-GHDL = ghdl
+GHDL = /home/speedy1/builds/ghdl-updates/ghdl_mcode
 TARGET = I2C_slave_TB
 
 RM = rm -rf

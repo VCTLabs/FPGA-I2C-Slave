@@ -20,8 +20,10 @@ entity I2C_slave is
     -- User interface
     read_req         : out   std_logic;
     data_to_master   : in    std_logic_vector(7 downto 0);
+    read_done        : out   std_logic;
     data_valid       : out   std_logic;
-    data_from_master : out   std_logic_vector(7 downto 0));
+    data_from_master : out   std_logic_vector(7 downto 0);
+    write_done       : out   std_logic);
 end entity I2C_slave;
 ------------------------------------------------------------
 architecture arch of I2C_slave is
@@ -67,7 +69,9 @@ architecture arch of I2C_slave is
   -- User interface
   signal data_valid_reg     : std_logic                    := '0';
   signal read_req_reg       : std_logic                    := '0';
+  signal read_done_reg      : std_logic                    := '0';
   signal data_to_master_reg : std_logic_vector(7 downto 0) := (others => '0');
+  signal write_done_reg     : std_logic                    := '0';
 begin
 
   -- debounce SCL and SDA
@@ -139,7 +143,9 @@ begin
       sda_wen_reg    <= '0';
       -- User interface
       data_valid_reg <= '0';
+      write_done_reg <= '0';
       read_req_reg   <= '0';
+      read_done_reg  <= '0';
 
       case state_reg is
 
@@ -249,6 +255,7 @@ begin
               end if;
             else
               state_reg <= read_stop;
+              read_done_reg <= '1';
             end if;
           end if;
 
@@ -268,11 +275,17 @@ begin
       -- Reset counter and state on start/stop
       --------------------------------------------------------
       if start_reg = '1' then
+        if state_reg = write then
+            write_done_reg <= '1';
+        end if;
         state_reg          <= get_address_and_cmd;
         bits_processed_reg <= 0;
       end if;
 
       if stop_reg = '1' then
+        if state_reg = write then
+            write_done_reg <= '1';
+        end if;
         state_reg          <= idle;
         bits_processed_reg <= 0;
       end if;
@@ -296,6 +309,8 @@ begin
   -- Master writes
   data_valid       <= data_valid_reg;
   data_from_master <= data_from_master_reg;
+  write_done       <= write_done_reg;
   -- Master reads
   read_req         <= read_req_reg;
+  read_done        <= read_done_reg;
 end architecture arch;
